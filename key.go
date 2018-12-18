@@ -57,7 +57,7 @@ type Keys struct {
 	*Client
 }
 
-// Create sends a /po
+// Create sends a POST to /keys to create a new Key with the specified parameters
 func (k *Keys) Create(key KeyInfo) (*KeyInfo, error) {
 	// marshal KeyInfo
 	kiJSON, err := json.Marshal(&key)
@@ -69,29 +69,7 @@ func (k *Keys) Create(key KeyInfo) (*KeyInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Token "+k.authToken.token)
-	rsp, err := k.httpClient().Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if rsp.StatusCode == http.StatusUnauthorized || rsp.StatusCode == http.StatusForbidden {
-		err := k.refreshAuthToken()
-		if err != nil {
-			// failed to refresh token, Create request is a failure
-			return nil, err
-		}
-		// retry the request
-		req.Header.Set("Authorization", "Token "+k.authToken.token)
-		rsp, err = k.httpClient().Do(req)
-		if err != nil {
-			return nil, err
-		}
-	}
-	if rsp.StatusCode != http.StatusOK {
-		return nil, errors.New("kms-client: failed to create key")
-	}
+	rsp, err := k.dispatchRequest(req)
 	var kiOut KeyInfo
 	err = json.NewDecoder(rsp.Body).Decode(&kiOut)
 	if err != nil {
