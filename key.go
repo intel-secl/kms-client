@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -32,9 +33,13 @@ type KeyInfo struct {
 }
 
 // Transfer performs a POST to /key/{id}/transfer to retrieve the actual key data from the KMS
-func (k *KeyID) Transfer() ([]byte, error) {
+func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	var keyObj KeyObj
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/keys/%s/transfer", k.BaseURL, k.ID), nil)
+	var samlBuf io.Reader
+	if saml != nil {
+		samlBuf = bytes.NewBuffer(saml)
+	}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/keys/%s/transfer", k.BaseURL, k.ID), samlBuf)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +69,6 @@ func (k *Keys) Create(key KeyInfo) (*KeyInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	// this aint gonna work
 	req, err := http.NewRequest("POST", k.BaseURL+"/keys", bytes.NewBuffer(kiJSON))
 	if err != nil {
 		return nil, err
