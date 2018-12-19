@@ -43,7 +43,10 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 	rsp, err := k.dispatchRequest(req)
+	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +76,10 @@ func (k *Keys) Create(key KeyInfo) (*KeyInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 	rsp, err := k.dispatchRequest(req)
+	defer rsp.Body.Close()
 	var kiOut KeyInfo
 	err = json.NewDecoder(rsp.Body).Decode(&kiOut)
 	if err != nil {

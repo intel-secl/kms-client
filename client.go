@@ -54,6 +54,7 @@ func (c *Client) httpClient() *http.Client {
 	return c.HTTPClient
 }
 
+// Key returns a reference to a KeyID on the KMS. It is a reference only, and does not immediately contain any Key information.
 func (c *Client) Key(uuid string) *KeyID {
 	return &KeyID{Client: c, ID: uuid}
 }
@@ -82,8 +83,9 @@ func (c *Client) refreshAuthToken() error {
 }
 
 func (c *Client) dispatchRequest(req *http.Request) (*http.Response, error) {
-	req.Header.Set("Accept", "Application/json")
-	req.Header.Set("Content-Type", "application/json")
+	if time.Now().After(c.authToken.notAfter) {
+		c.refreshAuthToken()
+	}
 	req.Header.Set("Authorization", "Token "+c.authToken.token)
 	rsp, err := c.httpClient().Do(req)
 	if err != nil && rsp.StatusCode == http.StatusUnauthorized || rsp.StatusCode == http.StatusForbidden {
