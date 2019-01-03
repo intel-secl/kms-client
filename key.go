@@ -11,8 +11,8 @@ import (
 
 // KeyID represents a single key id on the KMS, equating to /keys/id
 type KeyID struct {
-	*Client
-	ID string
+	client *Client
+	ID     string
 }
 
 // KeyObj is a represenation of the actual key
@@ -39,13 +39,13 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	if saml != nil {
 		samlBuf = bytes.NewBuffer(saml)
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/keys/%s/transfer", k.BaseURL, k.ID), samlBuf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/keys/%s/transfer", k.client.BaseURL, k.ID), samlBuf)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	rsp, err := k.dispatchRequest(req)
+	rsp, err := k.client.dispatchRequest(req)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 
 // Keys represents the resource collection of Keys on the KMS
 type Keys struct {
-	*Client
+	client *Client
 }
 
 // Create sends a POST to /keys to create a new Key with the specified parameters
@@ -72,13 +72,13 @@ func (k *Keys) Create(key KeyInfo) (*KeyInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", k.BaseURL+"/keys", bytes.NewBuffer(kiJSON))
+	req, err := http.NewRequest("POST", k.client.BaseURL+"/keys", bytes.NewBuffer(kiJSON))
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	rsp, err := k.dispatchRequest(req)
+	rsp, err := k.client.dispatchRequest(req)
 	defer rsp.Body.Close()
 	var kiOut KeyInfo
 	err = json.NewDecoder(rsp.Body).Decode(&kiOut)

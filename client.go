@@ -56,12 +56,12 @@ func (c *Client) httpClient() *http.Client {
 
 // Key returns a reference to a KeyID on the KMS. It is a reference only, and does not immediately contain any Key information.
 func (c *Client) Key(uuid string) *KeyID {
-	return &KeyID{Client: c, ID: uuid}
+	return &KeyID{client: c, ID: uuid}
 }
 
 // Keys returns a sub client that operates on KMS /keys endpoints, such as creating a new key
 func (c *Client) Keys() *Keys {
-	return &Keys{Client: c}
+	return &Keys{client: c}
 }
 
 func (c *Client) refreshAuthToken() error {
