@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	commonTls "intel/isecl/lib/common/tls"
@@ -20,7 +21,7 @@ type authToken struct {
 
 // A Client is defines parameters to connect and Authenticate with a KMS
 type Client struct {
-	// BaseURL specifies the URL base for the KMS, for example https://keymanagement.server/
+	// BaseURL specifies the URL base for the KMS, for example https://keymanagement.server/v1
 	BaseURL string
 	// Username used to authenticate with the KMS. Username is only used for obtaining an authorization token, which is automatically used for requests.
 	Username string
@@ -66,7 +67,13 @@ func (c *Client) Keys() *Keys {
 
 func (c *Client) refreshAuthToken() error {
 	loginForm := []byte(fmt.Sprintf(`{"username": "%s", "password": "%s"}`, c.Username, c.Password))
-	req, err := http.NewRequest(http.MethodPost, c.BaseURL, bytes.NewBuffer(loginForm))
+	baseURL, err := url.Parse(c.BaseURL)
+	if err != nil {
+		return err
+	}
+	loginURL, _ := url.Parse("/login")
+	reqURL := baseURL.ResolveReference(loginURL)
+	req, err := http.NewRequest(http.MethodPost, reqURL.String(), bytes.NewBuffer(loginForm))
 	if err != nil {
 		return err
 	}

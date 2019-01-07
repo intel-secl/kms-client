@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 // KeyID represents a single key id on the KMS, equating to /keys/id
@@ -39,7 +40,16 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	if saml != nil {
 		samlBuf = bytes.NewBuffer(saml)
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/keys/%s/transfer", k.client.BaseURL, k.ID), samlBuf)
+	baseURL, err := url.Parse(k.client.BaseURL)
+	if err != nil {
+		return nil, err
+	}
+	keyXferURL, err := url.Parse(fmt.Sprintf("/keys/%s/transfer", k.ID))
+	if err != nil {
+		return nil, err
+	}
+	reqURL := baseURL.ResolveReference(keyXferURL)
+	req, err := http.NewRequest("POST", reqURL.String(), samlBuf)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +82,13 @@ func (k *Keys) Create(key KeyInfo) (*KeyInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", k.client.BaseURL+"/keys", bytes.NewBuffer(kiJSON))
+	baseURL, err := url.Parse(k.client.BaseURL)
+	if err != nil {
+		return nil, err
+	}
+	keysURL, _ := url.Parse("/keys")
+	reqURL := baseURL.ResolveReference(keysURL)
+	req, err := http.NewRequest("POST", reqURL.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {
 		return nil, err
 	}
