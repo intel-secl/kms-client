@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -34,7 +35,6 @@ type KeyInfo struct {
 
 // Transfer performs a POST to /key/{id}/transfer to retrieve the actual key data from the KMS
 func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
-	var keyObj KeyObj
 	var samlBuf io.Reader
 	if saml != nil {
 		samlBuf = bytes.NewBuffer(saml)
@@ -52,7 +52,7 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Accept", "application/x-pem-file")
+	req.Header.Set("Accept", "application/octet-stream")
 	req.Header.Set("Content-Type", "application/json")
 	rsp, err := k.client.dispatchRequest(req)
 	defer rsp.Body.Close()
@@ -62,11 +62,8 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	if rsp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("kms-client: failed to transfer key (HTTP Status Code: %d)", rsp.StatusCode)
 	}
-	err = json.NewDecoder(rsp.Body).Decode(&keyObj)
-	if err != nil {
-		return nil, err
-	}
-	return keyObj.Key, nil
+	bytes, _ := ioutil.ReadAll(rsp.Body)
+	return bytes, nil
 }
 
 // Keys represents the resource collection of Keys on the KMS
