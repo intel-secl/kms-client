@@ -3,7 +3,6 @@ package kms
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -44,7 +43,7 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	keyXferURL, err := url.Parse(fmt.Sprintf("/keys/%s/transfer", k.ID))
+	keyXferURL, err := url.Parse(fmt.Sprintf("keys/%s/transfer", k.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +60,7 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 		return nil, err
 	}
 	if rsp.StatusCode != http.StatusOK {
-		return nil, errors.New("kms-client: failed to transfer key")
+		return nil, fmt.Errorf("kms-client: failed to transfer key (HTTP Status Code: %d)", rsp.StatusCode)
 	}
 	err = json.NewDecoder(rsp.Body).Decode(&keyObj)
 	if err != nil {
@@ -86,7 +85,7 @@ func (k *Keys) Create(key KeyInfo) (*KeyInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	keysURL, _ := url.Parse("/keys")
+	keysURL, _ := url.Parse("keys")
 	reqURL := baseURL.ResolveReference(keysURL)
 	req, err := http.NewRequest("POST", reqURL.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {

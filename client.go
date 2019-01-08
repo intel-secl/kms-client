@@ -71,7 +71,7 @@ func (c *Client) refreshAuthToken() error {
 	if err != nil {
 		return err
 	}
-	loginURL, _ := url.Parse("/login")
+	loginURL, _ := url.Parse("login")
 	reqURL := baseURL.ResolveReference(loginURL)
 	req, err := http.NewRequest(http.MethodPost, reqURL.String(), bytes.NewBuffer(loginForm))
 	if err != nil {
