@@ -53,7 +53,7 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Accept", "application/x-pem-file")
 	req.Header.Set("Content-Type", "application/json")
 	rsp, err := k.client.dispatchRequest(req)
 	defer rsp.Body.Close()
