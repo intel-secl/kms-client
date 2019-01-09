@@ -95,7 +95,10 @@ func (c *Client) dispatchRequest(req *http.Request) (*http.Response, error) {
 	}
 	req.Header.Set("Authorization", "Token "+c.authToken.token)
 	rsp, err := c.httpClient().Do(req)
-	if err != nil && rsp.StatusCode == http.StatusUnauthorized || rsp.StatusCode == http.StatusForbidden {
+	if err != nil {
+		return nil, err
+	}
+	if rsp.StatusCode == http.StatusUnauthorized || rsp.StatusCode == http.StatusForbidden {
 		err := c.refreshAuthToken()
 		if err != nil {
 			// failed to refresh token, Create request is a failure

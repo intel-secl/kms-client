@@ -33,6 +33,16 @@ type KeyInfo struct {
 	DigestAlgorithm string `json:"digest_algorithm"`
 }
 
+// Error is a error struct that contains error information thrown by the actual KMS
+type Error struct {
+	StatusCode int
+	Message    string
+}
+
+func (k Error) Error() string {
+	return fmt.Sprintf("kms-client: failed (HTTP Status Code: %d)\nMessage: %s", k.StatusCode, k.Message)
+}
+
 // Transfer performs a POST to /key/{id}/transfer to retrieve the actual key data from the KMS
 func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	var samlBuf io.Reader
@@ -55,12 +65,13 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	req.Header.Set("Accept", "application/octet-stream")
 	req.Header.Set("Content-Type", "application/json")
 	rsp, err := k.client.dispatchRequest(req)
-	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer rsp.Body.Close()
 	if rsp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("kms-client: failed to transfer key (HTTP Status Code: %d)", rsp.StatusCode)
+		errMsgBytes, _ := ioutil.ReadAll(rsp.Body)
+		return nil, &Error{StatusCode: rsp.StatusCode, Message: fmt.Sprintf("Failed to transfer key %s: %s", k.ID, string(errMsgBytes))}
 	}
 	bytes, _ := ioutil.ReadAll(rsp.Body)
 	return bytes, nil
