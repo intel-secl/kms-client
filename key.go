@@ -63,7 +63,7 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/octet-stream")
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "application/samlassertion+xml")
 	rsp, err := k.client.dispatchRequest(req)
 	if err != nil {
 		return nil, err
