@@ -1,3 +1,10 @@
+github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
+github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
+github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 gitlab.devtools.intel.com/sst/isecl/lib/common v0.0.0-20181217194442-de4737cfcf42 h1:tsD4u+iH2vnmXWExwZUmGIL3dIrtF/cAwUfkFCoMiSI=
 gitlab.devtools.intel.com/sst/isecl/lib/common v0.0.0-20181217194442-de4737cfcf42/go.mod h1:QoBuIKg0Olk/c0420oq1X87FqNfzduAA38tFMqDRU+8=
 gitlab.devtools.intel.com/sst/isecl/lib/common v0.0.0-20181217195019-751883e9f009 h1:07LO3ZV6krrUHw/6G6YLS1YRUcXXA+vRXpeZ+Cq4Kp8=

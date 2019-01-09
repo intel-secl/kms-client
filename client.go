@@ -12,11 +12,12 @@ import (
 	commonTls "intel/isecl/lib/common/tls"
 )
 
-type authToken struct {
-	token             string
-	authorizationDate time.Time
-	notAfter          time.Time
-	faults            interface{}
+// AuthToken issued by KMS
+type AuthToken struct {
+	AuthorizationToken string        `json:"authorization_token"`
+	AuthorizationDate  time.Time     `json:"authorization_date"`
+	NotAfter           time.Time     `json:"not_after"`
+	Faults             []interface{} `json:"faults"`
 }
 
 // A Client is defines parameters to connect and Authenticate with a KMS
@@ -35,7 +36,7 @@ type Client struct {
 	// A reference to the underlying http Client.
 	// If the value is nil, a default client will be created and used.
 	HTTPClient *http.Client
-	authToken  authToken
+	authToken  AuthToken
 }
 
 func (c *Client) httpClient() *http.Client {
@@ -90,10 +91,10 @@ func (c *Client) refreshAuthToken() error {
 }
 
 func (c *Client) dispatchRequest(req *http.Request) (*http.Response, error) {
-	if time.Now().After(c.authToken.notAfter) {
+	if c.authToken.AuthorizationToken == "" || time.Now().After(c.authToken.NotAfter) {
 		c.refreshAuthToken()
 	}
-	req.Header.Set("Authorization", "Token "+c.authToken.token)
+	req.Header.Set("Authorization", "Token "+c.authToken.AuthorizationToken)
 	rsp, err := c.httpClient().Do(req)
 	if err != nil {
 		return nil, err
@@ -105,7 +106,7 @@ func (c *Client) dispatchRequest(req *http.Request) (*http.Response, error) {
 			return nil, err
 		}
 		// retry the request
-		req.Header.Set("Authorization", "Token "+c.authToken.token)
+		req.Header.Set("Authorization", "Token "+c.authToken.AuthorizationToken)
 		rsp, err = c.httpClient().Do(req)
 	}
 	return rsp, err
