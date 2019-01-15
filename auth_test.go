@@ -1,6 +1,7 @@
 package kms
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
 
@@ -15,6 +16,9 @@ func TestAuthTokenDecode(t *testing.T) {
 		"faults": []
 	  }`
 	var token AuthToken
-	json.Unmarshal([]byte(raw), &token)
+	err := json.NewDecoder(bytes.NewBufferString(raw)).Decode(&token)
+	assert.NoError(t, err)
 	assert.Equal(t, "BSNZJFaXojS3uXfvr6wvKU2Gzx0z1f+9PfI9VwyY1A8=", token.AuthorizationToken)
+	assert.Equal(t, 2019, token.NotAfter.Year())
+	assert.Equal(t, 2019, token.AuthorizationDate.Year())
 }

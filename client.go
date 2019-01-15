@@ -7,16 +7,34 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 
 	commonTls "intel/isecl/lib/common/tls"
 )
 
+type ISO8601Time struct {
+	time.Time
+}
+
+const ISO8601Layout = "2006-01-02T15:04:05-0700"
+
+func (t *ISO8601Time) MarshalJSON() ([]byte, error) {
+	tstr := t.Format(ISO8601Layout)
+	return []byte(strconv.Quote(tstr)), nil
+}
+
+func (t *ISO8601Time) UnmarshalJSON(b []byte) (err error) {
+	t.Time, err = time.Parse(ISO8601Layout, strings.Trim(string(b), "\""))
+	return err
+}
+
 // AuthToken issued by KMS
 type AuthToken struct {
 	AuthorizationToken string        `json:"authorization_token"`
-	AuthorizationDate  time.Time     `json:"authorization_date"`
-	NotAfter           time.Time     `json:"not_after"`
+	AuthorizationDate  ISO8601Time   `json:"authorization_date"`
+	NotAfter           ISO8601Time   `json:"not_after"`
 	Faults             []interface{} `json:"faults"`
 }
 
@@ -91,7 +109,7 @@ func (c *Client) refreshAuthToken() error {
 }
 
 func (c *Client) dispatchRequest(req *http.Request) (*http.Response, error) {
-	if c.authToken.AuthorizationToken == "" || time.Now().After(c.authToken.NotAfter) {
+	if c.authToken.AuthorizationToken == "" || time.Now().After(c.authToken.NotAfter.Time) {
 		c.refreshAuthToken()
 	}
 	req.Header.Set("Authorization", "Token "+c.authToken.AuthorizationToken)
