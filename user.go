@@ -1,6 +1,7 @@
 package kms
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -57,4 +58,27 @@ func (k *Keys) GetKmsUser() (UserInfo, error) {
 		return userInfo, err
 	}
 	return users.Users[0], nil
+}
+
+func (k *Keys) RegisterUserPubKey(publicKey []byte, userID string) error {
+	baseURL, err := url.Parse(k.client.BaseURL)
+	if err != nil {
+		return err
+	}
+	keyXferURL, err := url.Parse(fmt.Sprintf("users/%s/transfer-key", userID))
+	if err != nil {
+		return err
+	}
+	reqURL := baseURL.ResolveReference(keyXferURL)
+	req, err := http.NewRequest("PUT", reqURL.String(), bytes.NewBuffer(publicKey))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-pem-file")
+	_, err = k.client.dispatchRequest(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
