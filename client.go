@@ -46,11 +46,11 @@ type Client struct {
 	Username string
 	// Password to supply for the Username
 	Password string
-	// CertSha256 is a pointer to a 32 byte array that specifies the fingerprint of the immediate TLS certificate to trust.
-	// If the value is a non nil pointer to a 32 byte array, custom TLS verification will be used, where any valid chain of X509 certificates
+	// CertSha384 is a pointer to a 48 byte array that specifies the fingerprint of the immediate TLS certificate to trust.
+	// If the value is a non nil pointer to a 48 byte array, custom TLS verification will be used, where any valid chain of X509 certificates
 	// with a self signed CA at the root will be accepted as long as the Host Certificates Fingerprint matches what is provided here
 	// If the value is a nil pointer, then system standard TLS verification will be used.
-	CertSha256 *[32]byte
+	CertSha384 *[48]byte
 	// A reference to the underlying http Client.
 	// If the value is nil, a default client will be created and used.
 	HTTPClient *http.Client
@@ -61,10 +61,10 @@ func (c *Client) httpClient() *http.Client {
 	if c.HTTPClient == nil {
 		// init http client
 		tlsConfig := tls.Config{}
-		if c.CertSha256 != nil {
+		if c.CertSha384 != nil {
 			// set explicit verification
 			tlsConfig.InsecureSkipVerify = true
-			tlsConfig.VerifyPeerCertificate = commonTls.VerifyCertBySha256(*c.CertSha256)
+			tlsConfig.VerifyPeerCertificate = commonTls.VerifyCertBySha384(*c.CertSha384)
 		}
 		transport := http.Transport{
 			TLSClientConfig: &tlsConfig,
