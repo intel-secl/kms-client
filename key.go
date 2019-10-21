@@ -53,22 +53,17 @@ func (k *KeyID) Transfer(saml []byte) ([]byte, error) {
 	if saml != nil {
 		samlBuf = bytes.NewBuffer(saml)
 	}
-	baseURL, err := url.Parse(k.client.BaseURL)
+	keyXferURL, err := url.Parse(k.client.BaseURL)
 	if err != nil {
 		return nil, err
 	}
-	keyXferURL, err := url.Parse(fmt.Sprintf("keys/%s/transfer", k.ID))
-	if err != nil {
-		return nil, err
-	}
-	reqURL := baseURL.ResolveReference(keyXferURL)
-	req, err := http.NewRequest("POST", reqURL.String(), samlBuf)
+	req, err := http.NewRequest("POST", keyXferURL.String(), samlBuf)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Accept", "application/octet-stream")
 	req.Header.Set("Content-Type", "application/samlassertion+xml")
-	rsp, err := k.client.dispatchRequest(req)
+	rsp, err := k.client.httpClient().Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +129,8 @@ func (k *KeyID) Retrieve() ([]byte, error) {
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	rsp, err := k.client.dispatchRequest(req)
+	req.SetBasicAuth(k.client.Username, k.client.Password)
+	rsp, err := k.client.httpClient().Do(req)
 	if err != nil {
 		return nil, err
 	}
