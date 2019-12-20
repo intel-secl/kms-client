@@ -6,4 +6,4 @@ require (
 	intel/isecl/lib/common v0.0.0
 )
 
-replace intel/isecl/lib/common => github.com/intel-secl/common v1.0.0-Beta.0.20190914192953-74ef37957884
+replace intel/isecl/lib/common => github.com/intel-secl/common v1.6
