@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	commonTls "intel/isecl/lib/common/tls"
+	commonTls "intel/isecl/lib/common/v2/tls"
 )
 
 type ISO8601Time struct {
